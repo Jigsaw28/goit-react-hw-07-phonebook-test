@@ -9,8 +9,8 @@ import {
 import { ErrorMessage, Formik } from 'formik';
 import * as yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from '../../redux/contactSlice';
 import { Flip, toast, ToastContainer } from 'react-toastify';
+import { addContact } from '../../redux/operations';
 
 const schema = yup.object({
   name: yup.string().required('Enter name, please.'),
@@ -37,7 +37,7 @@ export const PhonebookForm = () => {
 
   const handleSubmit = ({ name, number }, { resetForm }) => {
     const newContact = { name, number, id: nanoid() };
-    const doubleContact = contacts.find(
+    const doubleContact = contacts.items.find(
       contact => contact.name.toLowerCase() === newContact.name.toLowerCase()
     );
 

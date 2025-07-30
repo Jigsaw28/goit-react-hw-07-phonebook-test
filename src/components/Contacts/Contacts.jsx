@@ -7,13 +7,18 @@ import {
   ListItem,
 } from './Contacts.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from '../../redux/contactSlice';
 import { Flip, toast, ToastContainer } from 'react-toastify';
+import { useEffect } from 'react';
+import { getContactsThunk, deleteContact } from '../../redux/operations';
 
 export const Contacts = () => {
   const contacts = useSelector(state => state.contacts.contacts);
   const filter = useSelector(state => state.filter);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getContactsThunk());
+  }, [dispatch]);
 
   const handleDelete = id => {
     dispatch(deleteContact(id));
@@ -23,7 +28,7 @@ export const Contacts = () => {
     });
   };
 
-  const filteredContacts = contacts.filter(contact =>
+  const filteredContacts = contacts.items.filter(contact =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
 
@@ -33,7 +38,7 @@ export const Contacts = () => {
         <ListItem key={contact.id} className="item">
           <ContactInfo className="item">
             <ContactName>{contact.name}</ContactName>
-            <ContactNumber>{contact.number}</ContactNumber>
+            <ContactNumber>{contact.phone}</ContactNumber>
           </ContactInfo>
           <DeleteButton
             className="btn-delete"
