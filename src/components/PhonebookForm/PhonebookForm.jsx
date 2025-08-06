@@ -9,8 +9,9 @@ import {
 import { ErrorMessage, Formik } from 'formik';
 import * as yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { Flip, toast, ToastContainer } from 'react-toastify';
+import { Flip, toast } from 'react-toastify';
 import { addContact } from '../../redux/operations';
+import { useEffect, useState } from 'react';
 
 const schema = yup.object({
   name: yup.string().required('Enter name, please.'),
@@ -33,6 +34,7 @@ export const PhonebookForm = () => {
   let numberId = nanoid();
 
   const dispatch = useDispatch();
+  const [pendingName, setPendingName] = useState(null);
   const contacts = useSelector(state => state.contacts.contacts);
 
   const handleSubmit = ({ name, number }, { resetForm }) => {
@@ -42,20 +44,25 @@ export const PhonebookForm = () => {
     );
 
     if (doubleContact) {
-      toast.error(`${doubleContact.name} is already in contacts`, {
-        theme: 'colored',
-        transition: Flip,
-      });
+      toast.error(`${doubleContact.name} is already in contacts`);
     } else {
-      dispatch(addContact({ name, number, id: nanoid() }));
-      toast.success(`${newContact.name} has been added to contacts`, {
-        theme: 'colored',
-        transition: Flip,
-      });
+      dispatch(addContact(newContact));
+      setPendingName(newContact.name);
     }
 
     resetForm();
   };
+
+  useEffect(() => {
+    if (!contacts.isLoading && pendingName) {
+      toast.success(`${pendingName} has been added to contacts`, {
+        theme: 'colored',
+        transition: Flip,
+        autoClose: 2000,
+      });
+      setPendingName(null);
+    }
+  }, [contacts.isLoading, pendingName]);
 
   return (
     <Formik
@@ -71,7 +78,6 @@ export const PhonebookForm = () => {
         <Input type="tel" name="number" id={numberId} />
         <FormError name="number" component="div" />
         <ButtonSubmit type="submit">Add contact</ButtonSubmit>
-        <ToastContainer />
       </FormStyled>
     </Formik>
   );
